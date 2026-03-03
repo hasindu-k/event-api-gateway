@@ -17,6 +17,9 @@ app.use(
   createProxyMiddleware({
     target: process.env.USER_SERVICE_URL,
     changeOrigin: true,
+    pathRewrite: {
+      "^/users": "",
+    },
   }),
 );
 
@@ -26,6 +29,9 @@ app.use(
   createProxyMiddleware({
     target: process.env.EVENT_SERVICE_URL,
     changeOrigin: true,
+    pathRewrite: {
+      "^/events": "",
+    },
   }),
 );
 
@@ -35,6 +41,9 @@ app.use(
   createProxyMiddleware({
     target: process.env.BOOKING_SERVICE_URL,
     changeOrigin: true,
+    pathRewrite: {
+      "^/bookings": "",
+    },
   }),
 );
 
@@ -44,6 +53,9 @@ app.use(
   createProxyMiddleware({
     target: process.env.PAYMENT_SERVICE_URL,
     changeOrigin: true,
+    pathRewrite: {
+      "^/payments": "",
+    },
   }),
 );
 
