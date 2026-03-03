@@ -27,6 +27,18 @@ app.use(
   }),
 );
 
+// Public login route to User Service
+app.use(
+  "/users/login",
+  createProxyMiddleware({
+    target: process.env.USER_SERVICE_URL,
+    changeOrigin: true,
+    pathRewrite: {
+      "^/users": "",
+    },
+  }),
+);
+
 // Protected routes to User Service
 app.use(
   "/users",
