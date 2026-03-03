@@ -42,7 +42,7 @@ app.use(
 // Protected routes to User Service
 app.use(
   "/users",
-  authenticateToken,
+  // authenticateToken,
   createProxyMiddleware({
     target: process.env.USER_SERVICE_URL,
     changeOrigin: true,
@@ -55,7 +55,7 @@ app.use(
 // Route to Event Service
 app.use(
   "/events",
-  authenticateToken,
+  // authenticateToken,
   createProxyMiddleware({
     target: process.env.EVENT_SERVICE_URL,
     changeOrigin: true,
@@ -68,7 +68,7 @@ app.use(
 // Route to Booking Service
 app.use(
   "/bookings",
-  authenticateToken,
+  // authenticateToken,
   createProxyMiddleware({
     target: process.env.BOOKING_SERVICE_URL,
     changeOrigin: true,
@@ -81,7 +81,7 @@ app.use(
 // Route to Payment Service
 app.use(
   "/payments",
-  authenticateToken,
+  // authenticateToken,
   createProxyMiddleware({
     target: process.env.PAYMENT_SERVICE_URL,
     changeOrigin: true,
