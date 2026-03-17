@@ -10,6 +10,23 @@ const { authenticateToken } = require("./middleware/auth.middleware");
 const app = express();
 
 app.use(express.json());
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "http://localhost:3000");
+  res.header(
+    "Access-Control-Allow-Methods",
+    "GET,POST,PUT,DELETE,OPTIONS",
+  );
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization",
+  );
+
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204);
+  }
+
+  next();
+});
 
 app.use((req, res, next) => {
   console.log("Incoming request:", req.method, req.url);
@@ -65,6 +82,19 @@ app.use(
       proxyReq: fixRequestBody,
     },
     pathRewrite: () => "/api/users/login",
+  }),
+);
+
+app.use(
+  "/api/users",
+  authenticateToken,
+  createProxyMiddleware({
+    target: process.env.USER_SERVICE_URL,
+    changeOrigin: true,
+    on: {
+      proxyReq: fixRequestBody,
+    },
+    pathRewrite: (path) => `/api/users${path}`,
   }),
 );
 
