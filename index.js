@@ -98,6 +98,19 @@ app.use(
   }),
 );
 
+app.use(
+  "/api/notifications",
+  authenticateToken,
+  createProxyMiddleware({
+    target: process.env.NOTIFICATION_SERVICE_URL,
+    changeOrigin: true,
+    on: {
+      proxyReq: fixRequestBody,
+    },
+    pathRewrite: (path) => `/api/notifications${path}`,
+  }),
+);
+
 // Protected routes to User Service
 app.use(
   "/users",
@@ -156,6 +169,21 @@ app.use(
     },
     pathRewrite: {
       "^/payments": "",
+    },
+  }),
+);
+
+app.use(
+  "/notifications",
+  authenticateToken,
+  createProxyMiddleware({
+    target: process.env.NOTIFICATION_SERVICE_URL,
+    changeOrigin: true,
+    on: {
+      proxyReq: fixRequestBody,
+    },
+    pathRewrite: {
+      "^/notifications": "",
     },
   }),
 );
