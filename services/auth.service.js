@@ -14,8 +14,9 @@ function buildGatewayUrl(path) {
 }
 
 async function verifyUserForLogin(loginPayload) {
-  const loginPath = process.env.USER_LOGIN_PROXY_PATH || "/users/login";
-  const url = buildGatewayUrl(loginPath);
+  const loginPath = process.env.USER_LOGIN_PROXY_PATH || "/api/users/login";
+
+  const url = `${process.env.USER_SERVICE_URL}${loginPath}`;
 
   const response = await fetch(url, {
     method: "POST",
@@ -27,6 +28,7 @@ async function verifyUserForLogin(loginPayload) {
 
   let responseData = {};
   const contentType = response.headers.get("content-type") || "";
+
   if (contentType.includes("application/json")) {
     responseData = await response.json();
   }

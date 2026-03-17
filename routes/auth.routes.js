@@ -5,11 +5,13 @@ const { verifyUserForLogin } = require("../services/auth.service");
 const router = express.Router();
 
 router.post("/login", async (req, res) => {
-  const { email } = req.body;
+  const { email, password } = req.body;
 
-  if (!email) {
-    return res.status(400).json({ message: "Email required" });
-  }
+  if (!email || !password) {
+  return res.status(400).json({
+    message: "Email and password required",
+  });
+}
 
   if (!process.env.JWT_SECRET) {
     return res.status(500).json({ message: "JWT secret is not configured" });

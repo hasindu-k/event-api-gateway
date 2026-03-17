@@ -1,6 +1,9 @@
 require("dotenv").config();
 const express = require("express");
-const { createProxyMiddleware } = require("http-proxy-middleware");
+const {
+  createProxyMiddleware,
+  fixRequestBody,
+} = require("http-proxy-middleware");
 const authRoutes = require("./routes/auth.routes");
 const { authenticateToken } = require("./middleware/auth.middleware");
 
@@ -21,9 +24,22 @@ app.use(
   createProxyMiddleware({
     target: process.env.USER_SERVICE_URL,
     changeOrigin: true,
-    pathRewrite: {
-      "^/users": "",
+    on: {
+      proxyReq: fixRequestBody,
     },
+    pathRewrite: () => "/api/users/register",
+  }),
+);
+
+app.use(
+  "/api/users/register",
+  createProxyMiddleware({
+    target: process.env.USER_SERVICE_URL,
+    changeOrigin: true,
+    on: {
+      proxyReq: fixRequestBody,
+    },
+    pathRewrite: () => "/api/users/register",
   }),
 );
 
@@ -33,32 +49,49 @@ app.use(
   createProxyMiddleware({
     target: process.env.USER_SERVICE_URL,
     changeOrigin: true,
-    pathRewrite: {
-      "^/users": "",
+    on: {
+      proxyReq: fixRequestBody,
     },
+    pathRewrite: () => "/api/users/login",
+  }),
+);
+
+app.use(
+  "/api/users/login",
+  createProxyMiddleware({
+    target: process.env.USER_SERVICE_URL,
+    changeOrigin: true,
+    on: {
+      proxyReq: fixRequestBody,
+    },
+    pathRewrite: () => "/api/users/login",
   }),
 );
 
 // Protected routes to User Service
 app.use(
   "/users",
-  // authenticateToken,
+  authenticateToken,
   createProxyMiddleware({
     target: process.env.USER_SERVICE_URL,
     changeOrigin: true,
-    pathRewrite: {
-      "^/users": "",
+    on: {
+      proxyReq: fixRequestBody,
     },
+    pathRewrite: (path) => `/api/users${path}`,
   }),
 );
 
 // Route to Event Service
 app.use(
   "/events",
-  // authenticateToken,
+  authenticateToken,
   createProxyMiddleware({
     target: process.env.EVENT_SERVICE_URL,
     changeOrigin: true,
+    on: {
+      proxyReq: fixRequestBody,
+    },
     pathRewrite: {
       "^/events": "",
     },
@@ -68,10 +101,13 @@ app.use(
 // Route to Booking Service
 app.use(
   "/bookings",
-  // authenticateToken,
+  authenticateToken,
   createProxyMiddleware({
     target: process.env.BOOKING_SERVICE_URL,
     changeOrigin: true,
+    on: {
+      proxyReq: fixRequestBody,
+    },
     pathRewrite: {
       "^/bookings": "",
     },
@@ -81,10 +117,13 @@ app.use(
 // Route to Payment Service
 app.use(
   "/payments",
-  // authenticateToken,
+  authenticateToken,
   createProxyMiddleware({
     target: process.env.PAYMENT_SERVICE_URL,
     changeOrigin: true,
+    on: {
+      proxyReq: fixRequestBody,
+    },
     pathRewrite: {
       "^/payments": "",
     },
