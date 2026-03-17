@@ -14,7 +14,7 @@ app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "http://localhost:3000");
   res.header(
     "Access-Control-Allow-Methods",
-    "GET,POST,PUT,DELETE,OPTIONS",
+    "GET,POST,PUT,PATCH,DELETE,OPTIONS",
   );
   res.header(
     "Access-Control-Allow-Headers",
@@ -98,6 +98,19 @@ app.use(
   }),
 );
 
+app.use(
+  "/api/notifications",
+  authenticateToken,
+  createProxyMiddleware({
+    target: process.env.NOTIFICATION_SERVICE_URL,
+    changeOrigin: true,
+    on: {
+      proxyReq: fixRequestBody,
+    },
+    pathRewrite: (path) => `/api/notifications${path}`,
+  }),
+);
+
 // Protected routes to User Service
 app.use(
   "/users",
@@ -160,7 +173,23 @@ app.use(
   }),
 );
 
+app.use(
+  "/notifications",
+  authenticateToken,
+  createProxyMiddleware({
+    target: process.env.NOTIFICATION_SERVICE_URL,
+    changeOrigin: true,
+    on: {
+      proxyReq: fixRequestBody,
+    },
+    pathRewrite: {
+      "^/notifications": "",
+    },
+  }),
+);
+
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`API Gateway running on port ${PORT}`);
 });
+
