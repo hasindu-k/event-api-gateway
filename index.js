@@ -8,6 +8,15 @@ const authRoutes = require("./routes/auth.routes");
 const { authenticateToken } = require("./middleware/auth.middleware");
 
 const app = express();
+const publicUserPaths = new Set(["/login", "/register"]);
+
+function authenticateTokenUnlessPublicUserRoute(req, res, next) {
+  if (publicUserPaths.has(req.path)) {
+    return next();
+  }
+
+  return authenticateToken(req, res, next);
+}
 
 app.use(express.json());
 app.use((req, res, next) => {
@@ -48,18 +57,6 @@ app.use(
   }),
 );
 
-app.use(
-  "/api/users/register",
-  createProxyMiddleware({
-    target: process.env.USER_SERVICE_URL,
-    changeOrigin: true,
-    on: {
-      proxyReq: fixRequestBody,
-    },
-    pathRewrite: () => "/api/users/register",
-  }),
-);
-
 // Public login route to User Service
 app.use(
   "/users/login",
@@ -74,20 +71,8 @@ app.use(
 );
 
 app.use(
-  "/api/users/login",
-  createProxyMiddleware({
-    target: process.env.USER_SERVICE_URL,
-    changeOrigin: true,
-    on: {
-      proxyReq: fixRequestBody,
-    },
-    pathRewrite: () => "/api/users/login",
-  }),
-);
-
-app.use(
   "/api/users",
-  authenticateToken,
+  authenticateTokenUnlessPublicUserRoute,
   createProxyMiddleware({
     target: process.env.USER_SERVICE_URL,
     changeOrigin: true,
@@ -114,7 +99,7 @@ app.use(
 // Protected routes to User Service
 app.use(
   "/users",
-  authenticateToken,
+  authenticateTokenUnlessPublicUserRoute,
   createProxyMiddleware({
     target: process.env.USER_SERVICE_URL,
     changeOrigin: true,
@@ -192,4 +177,3 @@ const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`API Gateway running on port ${PORT}`);
 });
-
