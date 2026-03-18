@@ -1,5 +1,6 @@
 require("dotenv").config();
 const express = require("express");
+const cors = require("cors");
 const {
   createProxyMiddleware,
   fixRequestBody,
@@ -10,6 +11,15 @@ const { authenticateToken } = require("./middleware/auth.middleware");
 const app = express();
 const publicUserPaths = new Set(["/login", "/register"]);
 
+const allowedOrigins = [
+  process.env.USER_SERVICE_URL,
+  process.env.EVENT_SERVICE_URL,
+  process.env.BOOKING_SERVICE_URL,
+  process.env.PAYMENT_SERVICE_URL,
+  process.env.NOTIFICATION_SERVICE_URL,
+  process.env.FRONTEND_URL,
+].filter(Boolean); // Remove empty values
+
 function authenticateTokenUnlessPublicUserRoute(req, res, next) {
   if (publicUserPaths.has(req.path)) {
     return next();
@@ -19,23 +29,28 @@ function authenticateTokenUnlessPublicUserRoute(req, res, next) {
 }
 
 app.use(express.json());
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "http://localhost:3000");
-  res.header(
-    "Access-Control-Allow-Methods",
-    "GET,POST,PUT,PATCH,DELETE,OPTIONS",
-  );
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept, Authorization",
-  );
-
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(204);
-  }
-
-  next();
-});
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) === -1) {
+        const msg =
+          "The CORS policy for this site does not allow access from the specified Origin.";
+        return callback(new Error(msg), false);
+      }
+      return callback(null, true);
+    },
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: [
+      "Origin",
+      "X-Requested-With",
+      "Content-Type",
+      "Accept",
+      "Authorization",
+    ],
+  }),
+);
 
 app.use((req, res, next) => {
   console.log("Incoming request:", req.method, req.url);
