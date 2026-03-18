@@ -9,52 +9,342 @@
  * @swagger
  * /api/users/login:
  *   post:
- *     summary: Log in a user and retrieve a JWT token
+ *     summary: Login user
  *     tags: [Auth]
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - email
- *               - password
- *             properties:
- *               email:
- *                 type: string
- *                 format: email
- *                 description: User's email address
- *                 example: user@gmail.com
- *               password:
- *                 type: string
- *                 format: password
- *                 description: User's password
- *                 example: 123456
+ *             $ref: '#/components/schemas/LoginRequest'
  *     responses:
  *       200:
- *         description: Login successful
+ *         description: JWT token returned
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 token:
- *                   type: string
- *                   description: JWT access token
- *                 user:
- *                   type: object
- *                   properties:
- *                     id:
- *                       type: string
- *                     email:
- *                       type: string
- *                     role:
- *                       type: string
+ *               $ref: '#/components/schemas/LoginResponse'
  *       401:
  *         description: Invalid credentials
- *       500:
- *         description: Server error
+ */
+
+/**
+ * @swagger
+ * tags:
+ *   name: Users
+ *   description: User management API
+ */
+
+/**
+ * @swagger
+ * tags:
+ *   name: Internal
+ *   description: Internal service API
+ */
+
+/**
+ * @swagger
+ * /api/users/register:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Register a new user account
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/RegisterRequest'
+ *     responses:
+ *       201:
+ *         description: User created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       400:
+ *         description: Validation error
+ *       409:
+ *         description: Email already exists
+ */
+
+/**
+ * @swagger
+ * /api/users:
+ *   get:
+ *     tags: [Users]
+ *     summary: Get all users
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of users
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/User'
+ *       401:
+ *         description: Missing or invalid token
+ *       403:
+ *         description: Admin access required
+ */
+
+/**
+ * @swagger
+ * /api/users/admins:
+ *   get:
+ *     tags: [Users]
+ *     summary: Get all admin users
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of admins
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/User'
+ *       401:
+ *         description: Missing or invalid token
+ *       403:
+ *         description: Admin access required
+ *   post:
+ *     tags: [Users]
+ *     summary: Create a new admin user
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/RegisterRequest'
+ *     responses:
+ *       201:
+ *         description: Admin created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       401:
+ *         description: Missing or invalid token
+ *       403:
+ *         description: Admin access required
+ *       409:
+ *         description: Email already exists
+ */
+
+/**
+ * @swagger
+ * /api/users/admins/{id}:
+ *   put:
+ *     tags: [Users]
+ *     summary: Update an admin user
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UpdateUserRequest'
+ *     responses:
+ *       200:
+ *         description: Updated admin
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       400:
+ *         description: Validation error or target user is not an admin
+ *       401:
+ *         description: Missing or invalid token
+ *       403:
+ *         description: Admin access required
+ *       404:
+ *         description: Admin not found
+ *       409:
+ *         description: Email already exists
+ *   delete:
+ *     tags: [Users]
+ *     summary: Delete an admin user
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Admin deleted
+ *       400:
+ *         description: Target user is not an admin
+ *       401:
+ *         description: Missing or invalid token
+ *       403:
+ *         description: Admin access required
+ *       404:
+ *         description: Admin not found
+ */
+
+/**
+ * @swagger
+ * /api/users/me:
+ *   get:
+ *     tags: [Users]
+ *     summary: Get current logged-in user profile
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Current user profile
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       401:
+ *         description: Missing or invalid token
+ */
+
+/**
+ * @swagger
+ * /api/users/{id}:
+ *   get:
+ *     tags: [Users]
+ *     summary: Get user by ID
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: User data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       403:
+ *         description: Forbidden for another user
+ *       404:
+ *         description: User not found
+ *   put:
+ *     tags: [Users]
+ *     summary: Update user by ID
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UpdateUserRequest'
+ *     responses:
+ *       200:
+ *         description: Updated user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       400:
+ *         description: Validation error
+ *       403:
+ *         description: Forbidden for another user
+ *       404:
+ *         description: User not found
+ *       409:
+ *         description: Email already exists
+ *   delete:
+ *     tags: [Users]
+ *     summary: Delete user by ID
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: User deleted
+ *       403:
+ *         description: Forbidden for another user
+ *       404:
+ *         description: User not found
+ */
+
+/**
+ * @swagger
+ * /api/users/{id}/bookings:
+ *   get:
+ *     tags: [Users]
+ *     summary: Get user bookings
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: User bookings
+ *       403:
+ *         description: Forbidden for another user
+ *       404:
+ *         description: User not found
+ *       502:
+ *         description: Booking service unavailable
+ */
+
+/**
+ * @swagger
+ * /api/users/internal/{id}/exists:
+ *   get:
+ *     tags: [Internal]
+ *     summary: Internal endpoint for Booking Service user validation
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: header
+ *         name: x-service-token
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: User existence status
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserExistsResponse'
+ *       401:
+ *         description: Missing or invalid service token
  */
 
 /**
