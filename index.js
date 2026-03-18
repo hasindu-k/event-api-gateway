@@ -10,7 +10,7 @@ const { authenticateToken } = require("./middleware/auth.middleware");
 
 const app = express();
 const publicUserPaths = new Set(["/login", "/register"]);
-
+//
 const allowedOrigins = [
   process.env.USER_SERVICE_URL,
   process.env.EVENT_SERVICE_URL,
