@@ -7,9 +7,14 @@ const {
 } = require("http-proxy-middleware");
 const authRoutes = require("./routes/auth.routes");
 const { authenticateToken } = require("./middleware/auth.middleware");
+const swaggerUi = require("swagger-ui-express");
+const swaggerSpec = require("./swagger");
 
 const app = express();
 const publicUserPaths = new Set(["/login", "/register"]);
+
+// Serve Swagger UI
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 const allowedOrigins = [
   process.env.USER_SERVICE_URL,
@@ -18,6 +23,7 @@ const allowedOrigins = [
   process.env.PAYMENT_SERVICE_URL,
   process.env.NOTIFICATION_SERVICE_URL,
   process.env.FRONTEND_URL,
+  process.env.BASE_URL,
 ].filter(Boolean); // Remove empty values
 
 console.log("USER_SERVICE_URL:", process.env.USER_SERVICE_URL);
