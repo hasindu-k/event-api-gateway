@@ -20,6 +20,16 @@ const allowedOrigins = [
   process.env.FRONTEND_URL,
 ].filter(Boolean); // Remove empty values
 
+console.log("USER_SERVICE_URL:", process.env.USER_SERVICE_URL);
+console.log("EVENT_SERVICE_URL:", process.env.EVENT_SERVICE_URL);
+console.log("BOOKING_SERVICE_URL:", process.env.BOOKING_SERVICE_URL);
+console.log("PAYMENT_SERVICE_URL:", process.env.PAYMENT_SERVICE_URL);
+console.log("NOTIFICATION_SERVICE_URL:", process.env.NOTIFICATION_SERVICE_URL);
+console.log("FRONTEND_URL:", process.env.FRONTEND_URL);
+console.log("PORT:", process.env.PORT);
+console.log("BASE_URL:", process.env.BASE_URL);
+console.log("JWT_EXPIRES:", process.env.JWT_EXPIRES);
+
 function authenticateTokenUnlessPublicUserRoute(req, res, next) {
   if (publicUserPaths.has(req.path)) {
     return next();
