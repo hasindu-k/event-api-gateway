@@ -203,6 +203,11 @@ app.use(
   }),
 );
 
+app.use((err, req, res, next) => {
+  console.error(err); // Logs the error to the console
+  res.status(500).send("Internal Server Error");
+});
+
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`API Gateway running on port ${PORT}`);
