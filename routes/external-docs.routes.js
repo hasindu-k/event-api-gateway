@@ -25,12 +25,12 @@
  *                 type: string
  *                 format: email
  *                 description: User's email address
- *                 example: user@example.com
+ *                 example: user@gmail.com
  *               password:
  *                 type: string
  *                 format: password
  *                 description: User's password
- *                 example: password123
+ *                 example: 123456
  *     responses:
  *       200:
  *         description: Login successful
@@ -228,6 +228,220 @@
  *         description: Payment status updated
  *       404:
  *         description: Booking not found
+ *       401:
+ *         description: Unauthorized
+ */
+
+/**
+ * @swagger
+ * tags:
+ *   name: Events
+ *   description: Event management API
+ */
+
+/**
+ * @swagger
+ * /api/events:
+ *   get:
+ *     summary: Get all events
+ *     tags: [Events]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *         description: Items per page
+ *     responses:
+ *       200:
+ *         description: Events retrieved successfully
+ *       401:
+ *         description: Unauthorized
+ *   post:
+ *     summary: Create a new event
+ *     tags: [Events]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               organizerId:
+ *                 type: string
+ *               date:
+ *                 type: string
+ *                 format: date-time
+ *               venue:
+ *                 type: string
+ *               availableSeats:
+ *                 type: integer
+ *     responses:
+ *       201:
+ *         description: Event created successfully
+ *       400:
+ *         description: Invalid input
+ *       401:
+ *         description: Unauthorized
+ */
+
+/**
+ * @swagger
+ * /api/events/{id}:
+ *   get:
+ *     summary: Get event by ID
+ *     tags: [Events]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Event ID
+ *     responses:
+ *       200:
+ *         description: Event retrieved successfully
+ *       404:
+ *         description: Event not found
+ *       401:
+ *         description: Unauthorized
+ *   put:
+ *     summary: Update event by ID
+ *     tags: [Events]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Event ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               date:
+ *                 type: string
+ *                 format: date-time
+ *               venue:
+ *                 type: string
+ *               availableSeats:
+ *                 type: integer
+ *     responses:
+ *       200:
+ *         description: Event updated successfully
+ *       404:
+ *         description: Event not found
+ *       401:
+ *         description: Unauthorized
+ *   delete:
+ *     summary: Delete event by ID
+ *     tags: [Events]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Event ID
+ *     responses:
+ *       200:
+ *         description: Event cancelled successfully
+ *       404:
+ *         description: Event not found
+ *       401:
+ *         description: Unauthorized
+ */
+
+/**
+ * @swagger
+ * /api/events/organizer/{organizerId}:
+ *   get:
+ *     summary: Get events by organizer ID
+ *     tags: [Events]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: organizerId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Organizer ID
+ *     responses:
+ *       200:
+ *         description: Organizer events retrieved successfully
+ *       401:
+ *         description: Unauthorized
+ */
+
+/**
+ * @swagger
+ * /api/events/{id}/seats:
+ *   put:
+ *     summary: Update available seats for an event
+ *     tags: [Events]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Event ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - quantity
+ *             properties:
+ *               quantity:
+ *                 type: integer
+ *                 minimum: 1
+ *                 description: Number of seats to update
+ *                 example: 2
+ *               operation:
+ *                 type: string
+ *                 enum: [decrease, increase]
+ *                 description: Whether to decrease or increase seats
+ *                 example: decrease
+ *     responses:
+ *       200:
+ *         description: Seats updated successfully
+ *       400:
+ *         description: Invalid request body
+ *       404:
+ *         description: Event not found
  *       401:
  *         description: Unauthorized
  */
