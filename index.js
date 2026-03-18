@@ -142,7 +142,7 @@ app.use(
 
 // Route to Event Service
 app.use(
-  "/events",
+  "/api/events",
   authenticateToken,
   createProxyMiddleware({
     target: process.env.EVENT_SERVICE_URL,
@@ -150,15 +150,13 @@ app.use(
     on: {
       proxyReq: fixRequestBody,
     },
-    pathRewrite: {
-      "^/events": "",
-    },
+    pathRewrite: (path) => `/api/events${path}`,
   }),
 );
 
 // Route to Booking Service
 app.use(
-  "/bookings",
+  "/api/bookings",
   authenticateToken,
   createProxyMiddleware({
     target: process.env.BOOKING_SERVICE_URL,
@@ -166,15 +164,13 @@ app.use(
     on: {
       proxyReq: fixRequestBody,
     },
-    pathRewrite: {
-      "^/bookings": "",
-    },
+    pathRewrite: (path) => `/api/bookings${path}`,
   }),
 );
 
 // Route to Payment Service
 app.use(
-  "/payments",
+  "/api/payments",
   authenticateToken,
   createProxyMiddleware({
     target: process.env.PAYMENT_SERVICE_URL,
@@ -182,9 +178,7 @@ app.use(
     on: {
       proxyReq: fixRequestBody,
     },
-    pathRewrite: {
-      "^/payments": "",
-    },
+    pathRewrite: (path) => `/api/payments${path}`,
   }),
 );
 
