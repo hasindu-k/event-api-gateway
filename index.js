@@ -18,24 +18,42 @@ function authenticateTokenUnlessPublicUserRoute(req, res, next) {
   return authenticateToken(req, res, next);
 }
 
-app.use(express.json());
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "http://localhost:3000");
-  res.header(
-    "Access-Control-Allow-Methods",
-    "GET,POST,PUT,PATCH,DELETE,OPTIONS",
-  );
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept, Authorization",
-  );
+function authenticateServiceToken(req, res, next) {
+  const serviceToken = req.headers["x-service-token"];
+  const expectedServiceToken =
+    process.env.INTERNAL_SERVICE_TOKEN || "shared_service_secret";
 
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(204);
+  if (!serviceToken || serviceToken !== expectedServiceToken) {
+    return res.status(401).json({ message: "Unauthorized service request" });
   }
 
-  next();
-});
+  return next();
+}
+
+app.use(express.json());
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) === -1) {
+        const msg =
+          "The CORS policy for this site does not allow access from the specified Origin.";
+        return callback(new Error(msg), false);
+      }
+      return callback(null, true);
+    },
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: [
+      "Origin",
+      "X-Requested-With",
+      "Content-Type",
+      "Accept",
+      "Authorization",
+      "x-service-token",
+    ],
+  }),
+);
 
 app.use((req, res, next) => {
   console.log("Incoming request:", req.method, req.url);
@@ -80,6 +98,32 @@ app.use(
       proxyReq: fixRequestBody,
     },
     pathRewrite: (path) => `/api/users${path}`,
+  }),
+);
+
+app.use(
+  "/api/notifications/send",
+  authenticateServiceToken,
+  createProxyMiddleware({
+    target: process.env.NOTIFICATION_SERVICE_URL,
+    changeOrigin: true,
+    on: {
+      proxyReq: fixRequestBody,
+    },
+    pathRewrite: () => "/api/notifications/send",
+  }),
+);
+
+app.use(
+  "/api/notifications/events",
+  authenticateServiceToken,
+  createProxyMiddleware({
+    target: process.env.NOTIFICATION_SERVICE_URL,
+    changeOrigin: true,
+    on: {
+      proxyReq: fixRequestBody,
+    },
+    pathRewrite: () => "/api/notifications/events",
   }),
 );
 
