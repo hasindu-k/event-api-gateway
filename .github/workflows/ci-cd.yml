@@ -41,11 +41,3 @@ jobs:
 
       - name: Push Docker image to Docker Hub
         run: docker push ${{ secrets.DOCKER_USERNAME }}/api-gateway-service:latest
-
-      - name: Azure Web App Deploy
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: api-gateway-service
-          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
-          images: eventapicontainer-apapfzb4dzhmemat.azurecr.io/api-gateway-service:latest
-          slot-name: production
