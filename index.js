@@ -1,5 +1,6 @@
 require("dotenv").config();
 const express = require("express");
+const cors = require("cors");
 const {
   createProxyMiddleware,
   fixRequestBody,
@@ -9,6 +10,15 @@ const { authenticateToken } = require("./middleware/auth.middleware");
 
 const app = express();
 const publicUserPaths = new Set(["/login", "/register"]);
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  process.env.BASE_URL,
+  process.env.GATEWAY_BASE_URL,
+  ...(process.env.ALLOWED_ORIGINS || "")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean),
+].filter(Boolean);
 
 function authenticateTokenUnlessPublicUserRoute(req, res, next) {
   if (publicUserPaths.has(req.path)) {
