@@ -12,19 +12,8 @@ const swaggerSpec = require("./swagger");
 
 const app = express();
 const publicUserPaths = new Set(["/login", "/register"]);
-const allowedOrigins = [
-  process.env.FRONTEND_URL,
-  process.env.BASE_URL,
-  process.env.GATEWAY_BASE_URL,
-  ...(process.env.ALLOWED_ORIGINS || "")
-    .split(",")
-    .map((origin) => origin.trim())
-    .filter(Boolean),
-].filter(Boolean);
 
-// Serve Swagger UI
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-
+// Combine all allowed origins into a single array
 const allowedOrigins = [
   process.env.USER_SERVICE_URL,
   process.env.EVENT_SERVICE_URL,
@@ -33,7 +22,15 @@ const allowedOrigins = [
   process.env.NOTIFICATION_SERVICE_URL,
   process.env.FRONTEND_URL,
   process.env.BASE_URL,
+  process.env.GATEWAY_BASE_URL,
+  ...(process.env.ALLOWED_ORIGINS || "")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean),
 ].filter(Boolean); // Remove empty values
+
+// Serve Swagger UI
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 console.log("USER_SERVICE_URL:", process.env.USER_SERVICE_URL);
 console.log("EVENT_SERVICE_URL:", process.env.EVENT_SERVICE_URL);
