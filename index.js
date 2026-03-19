@@ -13,9 +13,7 @@ const swaggerSpec = require("./swagger");
 const app = express();
 const publicUserPaths = new Set(["/login", "/register"]);
 
-// Serve Swagger UI
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-
+// Combine all allowed origins into a single array
 const allowedOrigins = [
   process.env.USER_SERVICE_URL,
   process.env.EVENT_SERVICE_URL,
@@ -24,7 +22,15 @@ const allowedOrigins = [
   process.env.NOTIFICATION_SERVICE_URL,
   process.env.FRONTEND_URL,
   process.env.BASE_URL,
+  process.env.GATEWAY_BASE_URL,
+  ...(process.env.ALLOWED_ORIGINS || "")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean),
 ].filter(Boolean); // Remove empty values
+
+// Serve Swagger UI
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 console.log("USER_SERVICE_URL:", process.env.USER_SERVICE_URL);
 console.log("EVENT_SERVICE_URL:", process.env.EVENT_SERVICE_URL);
@@ -42,6 +48,18 @@ function authenticateTokenUnlessPublicUserRoute(req, res, next) {
   }
 
   return authenticateToken(req, res, next);
+}
+
+function authenticateServiceToken(req, res, next) {
+  const serviceToken = req.headers["x-service-token"];
+  const expectedServiceToken =
+    process.env.INTERNAL_SERVICE_TOKEN || "shared_service_secret";
+
+  if (!serviceToken || serviceToken !== expectedServiceToken) {
+    return res.status(401).json({ message: "Unauthorized service request" });
+  }
+
+  return next();
 }
 
 app.use(express.json());
@@ -64,6 +82,7 @@ app.use(
       "Content-Type",
       "Accept",
       "Authorization",
+      "x-service-token",
     ],
   }),
 );
@@ -116,6 +135,32 @@ app.use(
       proxyReq: fixRequestBody,
     },
     pathRewrite: (path) => `/api/users${path}`,
+  }),
+);
+
+app.use(
+  "/api/notifications/send",
+  authenticateServiceToken,
+  createProxyMiddleware({
+    target: process.env.NOTIFICATION_SERVICE_URL,
+    changeOrigin: true,
+    on: {
+      proxyReq: fixRequestBody,
+    },
+    pathRewrite: () => "/api/notifications/send",
+  }),
+);
+
+app.use(
+  "/api/notifications/events",
+  authenticateServiceToken,
+  createProxyMiddleware({
+    target: process.env.NOTIFICATION_SERVICE_URL,
+    changeOrigin: true,
+    on: {
+      proxyReq: fixRequestBody,
+    },
+    pathRewrite: () => "/api/notifications/events",
   }),
 );
 
