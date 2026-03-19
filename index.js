@@ -7,6 +7,8 @@ const {
 } = require("http-proxy-middleware");
 const authRoutes = require("./routes/auth.routes");
 const { authenticateToken } = require("./middleware/auth.middleware");
+const swaggerUi = require("swagger-ui-express");
+const swaggerSpec = require("./swagger");
 
 const app = express();
 const publicUserPaths = new Set(["/login", "/register"]);
@@ -19,6 +21,29 @@ const allowedOrigins = [
     .map((origin) => origin.trim())
     .filter(Boolean),
 ].filter(Boolean);
+
+// Serve Swagger UI
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+const allowedOrigins = [
+  process.env.USER_SERVICE_URL,
+  process.env.EVENT_SERVICE_URL,
+  process.env.BOOKING_SERVICE_URL,
+  process.env.PAYMENT_SERVICE_URL,
+  process.env.NOTIFICATION_SERVICE_URL,
+  process.env.FRONTEND_URL,
+  process.env.BASE_URL,
+].filter(Boolean); // Remove empty values
+
+console.log("USER_SERVICE_URL:", process.env.USER_SERVICE_URL);
+console.log("EVENT_SERVICE_URL:", process.env.EVENT_SERVICE_URL);
+console.log("BOOKING_SERVICE_URL:", process.env.BOOKING_SERVICE_URL);
+console.log("PAYMENT_SERVICE_URL:", process.env.PAYMENT_SERVICE_URL);
+console.log("NOTIFICATION_SERVICE_URL:", process.env.NOTIFICATION_SERVICE_URL);
+console.log("FRONTEND_URL:", process.env.FRONTEND_URL);
+console.log("PORT:", process.env.PORT);
+console.log("BASE_URL:", process.env.BASE_URL);
+console.log("JWT_EXPIRES:", process.env.JWT_EXPIRES);
 
 function authenticateTokenUnlessPublicUserRoute(req, res, next) {
   if (publicUserPaths.has(req.path)) {
@@ -68,6 +93,11 @@ app.use(
 app.use((req, res, next) => {
   console.log("Incoming request:", req.method, req.url);
   next();
+});
+
+// Gateway health check
+app.get("/", (req, res) => {
+  res.status(200).json({ message: "Gateway is running" });
 });
 
 app.use("/auth", authRoutes);
@@ -166,7 +196,7 @@ app.use(
 
 // Route to Event Service
 app.use(
-  "/events",
+  "/api/events",
   authenticateToken,
   createProxyMiddleware({
     target: process.env.EVENT_SERVICE_URL,
@@ -174,15 +204,13 @@ app.use(
     on: {
       proxyReq: fixRequestBody,
     },
-    pathRewrite: {
-      "^/events": "",
-    },
+    pathRewrite: (path) => `/api/events${path}`,
   }),
 );
 
 // Route to Booking Service
 app.use(
-  "/bookings",
+  "/api/bookings",
   authenticateToken,
   createProxyMiddleware({
     target: process.env.BOOKING_SERVICE_URL,
@@ -190,15 +218,13 @@ app.use(
     on: {
       proxyReq: fixRequestBody,
     },
-    pathRewrite: {
-      "^/bookings": "",
-    },
+    pathRewrite: (path) => `/api/bookings${path}`,
   }),
 );
 
 // Route to Payment Service
 app.use(
-  "/payments",
+  "/api/payments",
   authenticateToken,
   createProxyMiddleware({
     target: process.env.PAYMENT_SERVICE_URL,
@@ -206,9 +232,7 @@ app.use(
     on: {
       proxyReq: fixRequestBody,
     },
-    pathRewrite: {
-      "^/payments": "",
-    },
+    pathRewrite: (path) => `/api/payments${path}`,
   }),
 );
 
@@ -226,6 +250,11 @@ app.use(
     },
   }),
 );
+
+app.use((err, req, res, next) => {
+  console.error(err); // Logs the error to the console
+  res.status(500).send("Internal Server Error");
+});
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
