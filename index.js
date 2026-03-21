@@ -84,7 +84,7 @@ app.use((req, res, next) => {
 
 // Gateway health check
 app.get("/", (req, res) => {
-  res.status(200).json({ message: "Gateway is running" });
+  res.status(200).json({ message: "Gateway is updated and running" });
 });
 
 app.use("/auth", authRoutes);
