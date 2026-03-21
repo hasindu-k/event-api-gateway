@@ -221,7 +221,7 @@ app.use(
 );
 
 app.use(
-  "/api/payments",
+  "/api/payment",
   authenticateToken,
   createProxyMiddleware({
     target: process.env.PAYMENT_SERVICE_URL,
@@ -229,20 +229,7 @@ app.use(
     on: {
       proxyReq: fixRequestBody,
     },
-    pathRewrite: (path) => `/payments${path}`,
-  }),
-);
-
-app.use(
-  "/payments",
-  authenticateToken,
-  createProxyMiddleware({
-    target: process.env.PAYMENT_SERVICE_URL,
-    changeOrigin: true,
-    on: {
-      proxyReq: fixRequestBody,
-    },
-    pathRewrite: (path) => `/payments${path}`,
+    pathRewrite: (path) => `/api/payment${path}`,
   }),
 );
 
