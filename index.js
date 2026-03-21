@@ -23,6 +23,7 @@ const allowedOrigins = [
   process.env.FRONTEND_URL,
   process.env.BASE_URL,
   process.env.GATEWAY_BASE_URL,
+  process.env.ALLOWED_ORIGINS,
   ...(process.env.ALLOWED_ORIGINS || "")
     .split(",")
     .map((origin) => origin.trim())
