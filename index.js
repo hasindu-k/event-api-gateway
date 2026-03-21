@@ -27,9 +27,8 @@ const allowedOrigins = [
     .split(",")
     .map((origin) => origin.trim())
     .filter(Boolean),
-].filter(Boolean); // Remove empty values
+].filter(Boolean);
 
-// Serve Swagger UI
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 function authenticateTokenUnlessPublicUserRoute(req, res, next) {
@@ -56,7 +55,6 @@ app.use(express.json());
 app.use(
   cors({
     origin: (origin, callback) => {
-      // allow requests with no origin (like mobile apps or curl requests)
       if (!origin) return callback(null, true);
       if (allowedOrigins.indexOf(origin) === -1) {
         const msg =
@@ -82,14 +80,12 @@ app.use((req, res, next) => {
   next();
 });
 
-// Gateway health check
 app.get("/", (req, res) => {
   res.status(200).json({ message: "Gateway is updated and running" });
 });
 
 app.use("/auth", authRoutes);
 
-// Public route to User Service
 app.use(
   "/users/register",
   createProxyMiddleware({
@@ -102,7 +98,6 @@ app.use(
   }),
 );
 
-// Public login route to User Service
 app.use(
   "/users/login",
   createProxyMiddleware({
@@ -112,6 +107,19 @@ app.use(
       proxyReq: fixRequestBody,
     },
     pathRewrite: () => "/api/users/login",
+  }),
+);
+
+app.use(
+  "/api/users/internal",
+  authenticateServiceToken,
+  createProxyMiddleware({
+    target: process.env.USER_SERVICE_URL,
+    changeOrigin: true,
+    on: {
+      proxyReq: fixRequestBody,
+    },
+    pathRewrite: (path) => `/api/users/internal${path}`,
   }),
 );
 
@@ -167,7 +175,6 @@ app.use(
   }),
 );
 
-// Protected routes to User Service
 app.use(
   "/users",
   authenticateTokenUnlessPublicUserRoute,
@@ -199,7 +206,6 @@ app.use(
   }),
 );
 
-// Route to Booking Service
 app.use(
   "/api/bookings",
   authenticateToken,
@@ -213,7 +219,6 @@ app.use(
   }),
 );
 
-// Route to Payment Service
 app.use(
   "/api/payments",
   authenticateToken,
@@ -223,7 +228,20 @@ app.use(
     on: {
       proxyReq: fixRequestBody,
     },
-    pathRewrite: (path) => `/api/payments${path}`,
+    pathRewrite: (path) => `/payments${path}`,
+  }),
+);
+
+app.use(
+  "/payments",
+  authenticateToken,
+  createProxyMiddleware({
+    target: process.env.PAYMENT_SERVICE_URL,
+    changeOrigin: true,
+    on: {
+      proxyReq: fixRequestBody,
+    },
+    pathRewrite: (path) => `/payments${path}`,
   }),
 );
 
@@ -243,7 +261,7 @@ app.use(
 );
 
 app.use((err, req, res, next) => {
-  console.error(err); // Logs the error to the console
+  console.error(err);
   res.status(500).send("Internal Server Error");
 });
 
