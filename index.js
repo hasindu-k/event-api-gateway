@@ -181,10 +181,14 @@ app.use(
   }),
 );
 
-// Route to Event Service
 app.use(
   "/api/events",
-  authenticateToken,
+  (req, res, next) => {
+    if (req.method === "GET") {
+      return next();
+    }
+    return authenticateToken(req, res, next);
+  },
   createProxyMiddleware({
     target: process.env.EVENT_SERVICE_URL,
     changeOrigin: true,
