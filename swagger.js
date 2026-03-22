@@ -10,7 +10,10 @@ const options = {
     },
     servers: [
       {
-        url: process.env.BASE_URL || "http://localhost:8086",
+        url:
+          process.env.BASE_URL ||
+          process.env.GATEWAY_BASE_URL ||
+          "http://localhost:8086",
         description: "API Gateway Server",
       },
     ],
