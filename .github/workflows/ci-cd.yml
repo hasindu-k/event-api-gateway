@@ -6,8 +6,8 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_WEBAPP_NAME: api-gateway
-  ACR_NAME: eventapicontainer-apapfzb4dzhmemat
+  AZURE_WEBAPP_NAME: event-ticket-gateway
+  ACR_NAME: eventgatewayacr
   IMAGE_NAME: api-gateway-service
   NODE_VERSION: "20"
 
