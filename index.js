@@ -52,6 +52,8 @@ function authenticateServiceToken(req, res, next) {
   return next();
 }
 
+//test
+
 app.use(express.json());
 app.use(
   cors({
