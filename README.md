@@ -2,6 +2,23 @@
 
 Express-based API gateway for the event-management microservices. It centralizes authentication, CORS, Swagger documentation, and routing to the user, event, booking, payment, and notification services.
 
+## Microservice ecosystem
+
+This gateway is part of the Event Booking platform:
+
+- [Event API Gateway](https://github.com/hasindu-k/event-api-gateway) — request routing, authentication, and API documentation
+- [Event Booking Service](https://github.com/hasindu-k/event-booking-service) — booking management
+- [Event Service](https://github.com/OshadiJayananda/event-ticket-event-service) — event management
+- [User Service](https://github.com/Miyuri15/event-booking-user-service) — user accounts and authentication
+- [Payment Service](https://github.com/IT22362476/Event-Booking-paymentservice) — payment processing
+
+Clients communicate with the gateway, which forwards requests to the appropriate downstream service.
+
+## Frontend application
+
+- [Event Booking Frontend](https://github.com/Miyuri15/event-booking-frontend) — web client for browsing events, managing bookings, and interacting with the platform through this gateway
+- **Live frontend:** [lumaevents.vercel.app](https://lumaevents.vercel.app/)
+
 ## Requirements
 
 - Node.js 18 or newer
