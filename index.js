@@ -84,7 +84,17 @@ app.use((req, res, next) => {
 });
 
 app.get("/", (req, res) => {
-  res.status(200).json({ message: "Gateway is updated and running" });
+  res.status(200).json({
+    name: "event-api-gateway",
+    status: "ok",
+  });
+});
+
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "ok",
+    timestamp: new Date().toISOString(),
+  });
 });
 
 app.use("/auth", authRoutes);
@@ -252,7 +262,7 @@ app.use(
 
 app.use((err, req, res, next) => {
   console.error(err);
-  res.status(500).send("Internal Server Error");
+  res.status(500).json({ message: "Internal Server Error" });
 });
 
 const PORT = process.env.PORT || 8080;
